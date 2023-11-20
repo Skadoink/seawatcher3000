@@ -1,0 +1,17 @@
+C:\Users\User\OneDrive\Programming\seawatcher3000\bin\Debug\net8.0\seawatcher3000.exe
+C:\Users\User\OneDrive\Programming\seawatcher3000\bin\Debug\net8.0\seawatcher3000.deps.json
+C:\Users\User\OneDrive\Programming\seawatcher3000\bin\Debug\net8.0\seawatcher3000.runtimeconfig.json
+C:\Users\User\OneDrive\Programming\seawatcher3000\bin\Debug\net8.0\seawatcher3000.dll
+C:\Users\User\OneDrive\Programming\seawatcher3000\bin\Debug\net8.0\seawatcher3000.pdb
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.AssemblyInfoInputs.cache
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.AssemblyInfo.cs
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.csproj.CoreCompileInputs.cache
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.dll
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\refint\seawatcher3000.dll
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.pdb
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.genruntimeconfig.cache
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\ref\seawatcher3000.dll
+C:\Users\User\OneDrive\Programming\seawatcher3000\bin\Debug\net8.0\nikoncswrapper.dll
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.csproj.AssemblyReference.cache
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.csproj.CopyComplete
