@@ -15,3 +15,4 @@ C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\ref\seawatche
 C:\Users\User\OneDrive\Programming\seawatcher3000\bin\Debug\net8.0\nikoncswrapper.dll
 C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.csproj.AssemblyReference.cache
 C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.csproj.CopyComplete
+C:\Users\User\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.sourcelink.json

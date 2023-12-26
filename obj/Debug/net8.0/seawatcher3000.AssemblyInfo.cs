@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("seawatcher3000")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fe6d08f4a0e48e7b0f9887bb1d009ee27919df9c")]
 [assembly: System.Reflection.AssemblyProductAttribute("seawatcher3000")]
 [assembly: System.Reflection.AssemblyTitleAttribute("seawatcher3000")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
