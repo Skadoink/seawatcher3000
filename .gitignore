@@ -5,12 +5,8 @@
 obj/Debug/net8.0/seawatcher3000.AssemblyInfo.cs
 obj/Debug/net8.0/seawatcher3000.AssemblyInfoInputs.cache
 obj/Release/net8.0/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs
-obj/Release/net8.0/seawatcher3000.AssemblyInfo.cs
-obj/Release/net8.0/seawatcher3000.AssemblyInfoInputs.cache
 obj/Release/net8.0/seawatcher3000.assets.cache
 obj/Release/net8.0/seawatcher3000.csproj.AssemblyReference.cache
 obj/Release/net8.0/seawatcher3000.GeneratedMSBuildEditorConfig.editorconfig
 obj/Release/net8.0/seawatcher3000.GlobalUsings.g.cs
 *.vsidx
-obj/Debug/net8.0/seawatcher3000.AssemblyInfoInputs.cache
-obj/Debug/net8.0/seawatcher3000.AssemblyInfo.cs
