@@ -1,33 +1,21 @@
 ﻿using Nikon;
+using System;
 
-namespace seawatcher3000
+NikonManager manager = new NikonManager("Type0020.md3");
+manager.DeviceAdded += new DeviceAddedDelegate(manager_DeviceAdded);
 
-
-
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            NikonManager manager = new NikonManager("Type0020.md3");
-            NikonDevice device = manager.Devices[0];
-            device.Capture();
-            manager.Shutdown();
-        }
-    }
-}
-
-NikonManager manager = new NikonManager("Type0020.md3"); 
-
+/// <summary>
+/// What to do when a device is added
+/// </summary>
 void manager_DeviceAdded(NikonManager sender, NikonDevice device)
 {
-    Console.WriteLine("Device added: " + device.Name);
+    /*Console.WriteLine("Device added: " + device.Name);
     NkMAIDCapInfo[] supportedCaps = device.GetCapabilityInfo();
     // Write list of supported capabilities to the console
     foreach (NkMAIDCapInfo supportedCap in supportedCaps)
     {
         Console.WriteLine(supportedCap.GetDescription());
-    }
+    }*/
 
     try
     {
@@ -39,23 +27,27 @@ void manager_DeviceAdded(NikonManager sender, NikonDevice device)
         Console.WriteLine("Error getting battery level: " + ex.Message);
     }
 
+    device.ImageReady += new ImageReadyDelegate(device_ImageReady);
+    device.CapabilityValueChanged += new CapabilityChangedDelegate(device_CapabilityValueChanged);
+
+    device.Start(eNkMAIDCapability.kNkMAIDCapability_Capture);
+//    device.Capture();
+
+    sender.Shutdown();
 }
 
-void device_ImageReady(NikonDevice device, NikonImage image)
+/// <summary>
+/// What to do when an image is ready
+/// </summary>
+void device_ImageReady(NikonDevice sender, NikonImage image)
 {
-    NkMAIDCapInfo[] supportedCaps = device.GetCapabilityInfo();
-    // Write list of supported capabilities to the console
-    foreach (NkMAIDCapInfo supportedCap in supportedCaps)
-    {
-        Console.WriteLine(supportedCap.GetDescription());
-    }
+    Console.WriteLine("Image ready: ");
 }
 
-manager.DeviceAdded += new DeviceAddedDelegate(manager_DeviceAdded);
-
-// device.ImageReady += new ImageReadyDelegate(device_ImageReady);
-
-Console.WriteLine("Press any key to exit...");
-Console.ReadKey();
-
-manager.Shutdown();
+/// <summary>
+/// What to do when a capability value changes
+/// </summary>
+void device_CapabilityValueChanged(NikonDevice sender, eNkMAIDCapability capability)
+{
+    Console.WriteLine("Capability value changed: " );
+}
