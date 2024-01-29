@@ -34,3 +34,4 @@ C:\Users\oskae\OneDrive\Programming\seawatcher3000\bin\Debug\net8.0\nikoncswrapp
 C:\Users\oskae\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.csproj.CopyComplete
 C:\Users\oskae\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.genruntimeconfig.cache
 C:\Users\oskae\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\ref\seawatcher3000.dll
+C:\Users\oskae\OneDrive\Programming\seawatcher3000\obj\Debug\net8.0\seawatcher3000.csproj.ResolveComReference.cache

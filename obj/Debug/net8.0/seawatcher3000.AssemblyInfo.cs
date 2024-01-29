@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("seawatcher3000")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+427c4ebd143f1c80c4f0c79cfd80686391a2b514")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d4235e4e7f68dc806b79f7217785a00791cd83ec")]
 [assembly: System.Reflection.AssemblyProductAttribute("seawatcher3000")]
 [assembly: System.Reflection.AssemblyTitleAttribute("seawatcher3000")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

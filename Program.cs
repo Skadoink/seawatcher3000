@@ -1,14 +1,25 @@
 ﻿using Nikon;
-using System;
+using System.Diagnostics;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using System.IO;
 
-NikonManager manager = new NikonManager("Type0020.md3");
+
+NikonManager manager = new("Type0020.md3");
+NikonDevice _device;
+DispatcherTimer _timer = new();
+_timer.Interval = TimeSpan.FromMilliseconds(100);
 manager.DeviceAdded += new DeviceAddedDelegate(manager_DeviceAdded);
+
 
 /// <summary>
 /// What to do when a device is added
 /// </summary>
 void manager_DeviceAdded(NikonManager sender, NikonDevice device)
 {
+    _device = device;
+    _timer.Tick += new EventHandler(timerTick);
+
     Console.WriteLine("Device added: " + device.Name);
     NkMAIDCapInfo[] supportedCaps = device.GetCapabilityInfo();
     // Write list of supported capabilities to the console
@@ -27,68 +38,91 @@ void manager_DeviceAdded(NikonManager sender, NikonDevice device)
     {
         Console.WriteLine("Error getting battery level: " + ex.Message);
     }
-    device.ImageReady += new ImageReadyDelegate(device_ImageReady);
-    device.CaptureComplete += new CaptureCompleteDelegate(onCaptureComplete);
-    try
-    {
-        // Verify ImageReady capability is supported before adding the delegate
-        if (device.IsCapabilitySupported(eNkMAIDCapability.eNkMAIDCapability_ImageReady))
-        {
-            device.ImageReady += new ImageReadyDelegate(device_ImageReady);
-        }
-        else
-        {
-            Console.WriteLine("ImageReady capability is not supported on this device.");
-        }
 
-        // Verify CaptureComplete capability is supported before adding the delegate
-        if (device.IsCapabilitySupported(eNkMAIDCapability.eNkMAIDCapability_CaptureComplete))
-        {
-            device.CaptureComplete += new CaptureCompleteDelegate(onCaptureComplete);
-        }
-        else
-        {
-            Console.WriteLine("CaptureComplete capability is not supported on this device.");
-        }
 
-        // Verify CapabilityValueChanged capability is supported before adding the delegate
-        if (device.IsCapabilitySupported(eNkMAIDCapability.eNkMAIDCapability_CapabilityValueChanged))
-        {
-            device.CapabilityValueChanged += new CapabilityChangedDelegate(device_CapabilityValueChanged);
-        }
-        else
-        {
-            Console.WriteLine("CapabilityValueChanged capability is not supported on this device.");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("Error adding delegates: " + ex.Message);
-    }
-
-    device.Start(eNkMAIDCapability.kNkMAIDCapability_Capture); //captur
     device.Capture();
+    StartLiveView();
 
     sender.Shutdown();
 }
 
-/// <summary>
-/// What to do when an image is ready
-/// </summary>
-void device_ImageReady(NikonDevice sender, NikonImage image)
+void StartLiveView()
 {
-    Console.WriteLine("Image ready: ");
+    try
+    {
+        if (_device != null)
+        {
+            _device.LiveViewEnabled = true;
+            _timer.Start();
+        }
+    }
+    catch (NikonException ex)
+    {
+        Console.WriteLine("Failed to start live view: " + ex.ToString());
+    }
 }
 
-/// <summary>
-/// What to do when a capability value changes
-/// </summary>
-void device_CapabilityValueChanged(NikonDevice sender, eNkMAIDCapability capability)
+void timerTick(object sender, EventArgs e)
 {
-    Console.WriteLine("Capability value changed: " );
+    Debug.Assert(_device != null);
+
+    NikonLiveViewImage liveViewImage = null;
+
+    try
+    {
+        liveViewImage = _device.GetLiveViewImage();
+    }
+    catch (NikonException ex)
+    {
+        Console.WriteLine("Failed to get live view image: " + ex.ToString());
+    }
+
+    if (liveViewImage == null)
+    {
+        _timer.Stop();
+        return;
+    }
+
+    // Note: Decode the live view jpeg image on a seperate thread to keep the UI responsive
+
+    ThreadPool.QueueUserWorkItem(new WaitCallback((o) =>
+    {
+        Debug.Assert(liveViewImage != null);
+
+        JpegBitmapDecoder decoder = new JpegBitmapDecoder(
+            new MemoryStream(liveViewImage.JpegBuffer),
+            BitmapCreateOptions.None,
+            BitmapCacheOption.OnLoad);
+
+        Debug.Assert(decoder.Frames.Count > 0);
+        BitmapFrame frame = decoder.Frames[0];
+
+        Dispatcher.CurrentDispatcher.Invoke((Action)(() =>
+        {
+            //SetLiveViewImage(frame);
+        }));
+    }));
+
+    Save(liveViewImage.JpegBuffer, "liveview.jpg");
 }
 
-void onCaptureComplete(NikonDevice sender, int data)
+void Save(byte[] buffer, string file)
 {
-    Console.WriteLine("Capture complete: " + data);
+    string path = Path.Combine(
+        System.Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
+        file);
+
+    Console.WriteLine("Saving: " + path);
+
+    try
+    {
+        using (FileStream stream = new FileStream(path, FileMode.Create, FileAccess.Write))
+        {
+            stream.Write(buffer, 0, buffer.Length);
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Failed to save file: " + path + ", " + ex.Message);
+    }
 }
