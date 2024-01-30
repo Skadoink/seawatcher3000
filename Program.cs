@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using System.Threading;
 using System.IO;
 
 
@@ -18,7 +19,7 @@ manager.DeviceAdded += new DeviceAddedDelegate(manager_DeviceAdded);
 void manager_DeviceAdded(NikonManager sender, NikonDevice device)
 {
     _device = device;
-    _timer.Tick += new EventHandler(timerTick);
+    _timer.Tick += new EventHandler(_timer_Tick);
 
     Trace.WriteLine("Device added: " + device.Name);
     NkMAIDCapInfo[] supportedCaps = device.GetCapabilityInfo();
@@ -42,9 +43,10 @@ void manager_DeviceAdded(NikonManager sender, NikonDevice device)
 
     device.Capture();
     StartLiveView();
-    StopLiveView();
-
-    sender.Shutdown();
+    //let live view run for 5 seconds
+    //Thread.Sleep(5000);
+    //StopLiveView();
+    //sender.Shutdown();
 }
 
 void StartLiveView()
@@ -82,8 +84,9 @@ void StopLiveView()
     }
 }
 
-void timerTick(object sender, EventArgs e)
+void _timer_Tick(object sender, EventArgs e)
 {
+    Trace.WriteLine("Tick");
     Debug.Assert(_device != null);
 
     NikonLiveViewImage liveViewImage = null;
@@ -124,6 +127,10 @@ void timerTick(object sender, EventArgs e)
     }));
 
     Save(liveViewImage.JpegBuffer, "liveview.jpg");
+    using (FileStream stream = new FileStream("liveview.jpg", FileMode.Create, FileAccess.Write))
+    {
+        stream.Write(liveViewImage.JpegBuffer, 0, liveViewImage.JpegBuffer.Length);
+    }
 }
 
 void Save(byte[] buffer, string file)
