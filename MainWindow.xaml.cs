@@ -9,15 +9,19 @@ namespace seawatcher3000
 {
     public partial class MainWindow
     {
+        private Seawatcher sw;
         public MainWindow()
         {
             InitializeComponent();
+            sw = new Seawatcher();
         }
         void OnKeyDownHandler(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)
             {
                 textBlock1.Text = "You Entered: " + textBox1.Text;
+                //end live view
+                sw.StopLiveView();
             }
         }
     }
