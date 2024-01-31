@@ -4,6 +4,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using System.Threading;
 using System.IO;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 
 NikonManager manager = new("Type0020.md3");
