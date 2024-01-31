@@ -24,4 +24,10 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Update="MainWindow.xaml">
+      <Generator></Generator>
+    </Page>
+  </ItemGroup>
+
 </Project>
