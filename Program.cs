@@ -44,17 +44,9 @@ namespace seawatcher3000
             {
                 Console.WriteLine("Error getting battery level: " + ex.Message);
             }
-
-
-            device.Capture();
-            StartLiveView();
-            //let live view run for 5 seconds
-            //Thread.Sleep(5000);
-            //StopLiveView();
-            //sender.Shutdown();
         }
 
-        void StartLiveView()
+        public void StartLiveView()
         {
             try
             {
@@ -64,6 +56,7 @@ namespace seawatcher3000
                     device.LiveViewEnabled = true;
                     _timer.Start();
                 }
+                else { throw new Exception(); }
             }
             catch (NikonException ex)
             {
@@ -82,6 +75,7 @@ namespace seawatcher3000
                     _timer.Stop();
                     device.LiveViewEnabled = false;
                 }
+                else { throw new Exception(); }
             }
             catch (NikonException ex)
             {
@@ -112,30 +106,28 @@ namespace seawatcher3000
             }
 
             // Note: Decode the live view jpeg image on a seperate thread to keep the UI responsive
+            // Not using this right now because there is no live display in the UI. 
 
-            ThreadPool.QueueUserWorkItem(new WaitCallback((o) =>
-            {
-                Debug.Assert(liveViewImage != null);
 
-                JpegBitmapDecoder decoder = new JpegBitmapDecoder(
-                    new MemoryStream(liveViewImage.JpegBuffer),
-                    BitmapCreateOptions.None,
-                    BitmapCacheOption.OnLoad);
+            //ThreadPool.QueueUserWorkItem(new WaitCallback((o) =>
+            //{
+            //    Debug.Assert(liveViewImage != null);
 
-                Debug.Assert(decoder.Frames.Count > 0);
-                BitmapFrame frame = decoder.Frames[0];
+            //    JpegBitmapDecoder decoder = new JpegBitmapDecoder(
+            //        new MemoryStream(liveViewImage.JpegBuffer),
+            //        BitmapCreateOptions.None,
+            //        BitmapCacheOption.OnLoad);
 
-                Dispatcher.CurrentDispatcher.Invoke((Action)(() =>
-                {
-                    //SetLiveViewImage(frame);
-                }));
-            }));
+            //    Debug.Assert(decoder.Frames.Count > 0);
+            //    BitmapFrame frame = decoder.Frames[0];
+
+            //    Dispatcher.CurrentDispatcher.Invoke((Action)(() =>
+            //    {
+            //        SetLiveViewImage(frame);
+            //    }));
+            //}));
 
             Save(liveViewImage.JpegBuffer, "liveview.jpg");
-            using (FileStream stream = new FileStream("liveview.jpg", FileMode.Create, FileAccess.Write))
-            {
-                stream.Write(liveViewImage.JpegBuffer, 0, liveViewImage.JpegBuffer.Length);
-            }
         }
 
         void Save(byte[] buffer, string file)

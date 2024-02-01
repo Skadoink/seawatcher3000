@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace seawatcher3000
@@ -10,18 +12,46 @@ namespace seawatcher3000
     public partial class MainWindow
     {
         private Seawatcher sw;
+        private bool justCheckedToggleHereSoPleaseBreakInfiniteLoop = false;
         public MainWindow()
         {
             InitializeComponent();
             sw = new Seawatcher();
         }
-        void OnKeyDownHandler(object sender, KeyEventArgs e)
+
+        private void OnToggledHandler(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (e.Key == Key.Return)
+            if (justCheckedToggleHereSoPleaseBreakInfiniteLoop)
             {
-                textBlock1.Text = "You Entered: " + textBox1.Text;
-                //end live view
-                sw.StopLiveView();
+                justCheckedToggleHereSoPleaseBreakInfiniteLoop = false;
+                return;
+            }
+            if (toggleButton1.IsChecked == true)
+            {
+                
+                try
+                {
+                    sw.StartLiveView();
+                    toggleButton1.Content = "Stop Live View";
+                }
+                catch
+                {
+                    justCheckedToggleHereSoPleaseBreakInfiniteLoop = true;
+                    toggleButton1.IsChecked = false;
+                }
+            }
+            else
+            {
+                try
+                {
+                    sw.StopLiveView();
+                    toggleButton1.Content = "Start Live View";
+                }
+                catch
+                {
+                    justCheckedToggleHereSoPleaseBreakInfiniteLoop = true;
+                    toggleButton1.IsChecked = true;
+                }
             }
         }
     }

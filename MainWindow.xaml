@@ -3,12 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"       
         xmlns:local="clr-namespace:seawatcher3000"
         Title="SeaWatcher3000" Height="768" Width="1024" MinHeight="480" MinWidth="640">
-    <StackPanel>
-    <TextBlock Width="300" Height="20">
-    Type some text into the TextBox and press the Enter key.
-    </TextBlock>
-    <TextBox Width="300" Height="30" x:Name="textBox1"
-           KeyDown="OnKeyDownHandler"/>
-    <TextBlock Width="300" Height="100" x:Name="textBlock1"/>
-</StackPanel>
+    <StackPanel VerticalAlignment="Center">
+        <ToggleButton Content="Start Live Feed" Height="80" Width="158" x:Name="toggleButton1" Background="#FFDDDDDD"
+                      Checked="OnToggledHandler" Unchecked="OnToggledHandler"/>
+    </StackPanel>
 </Window>
