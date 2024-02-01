@@ -8,9 +8,9 @@ namespace seawatcher3000
 {
     class Seawatcher
     {
-        NikonManager manager = new("Type0020.md3");
+        public static NikonManager manager = new("Type0020.md3");
         NikonDevice _device;
-        DispatcherTimer _timer = new();
+        public static DispatcherTimer _timer = new();
 
         public Seawatcher()
         {
