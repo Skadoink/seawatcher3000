@@ -110,3 +110,6 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
+*.cache
+*.props
+*.json
