@@ -116,3 +116,7 @@ StyleCopReport.xml
 *.json
 obj/seawatcher3000.csproj.nuget.g.props
 /obj
+obj/seawatcher3000.csproj.nuget.g.props
+obj/seawatcher3000.csproj.nuget.dgspec.json
+obj/project.nuget.cache
+obj/project.assets.json
