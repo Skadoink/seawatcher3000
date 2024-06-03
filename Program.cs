@@ -108,7 +108,6 @@ namespace seawatcher3000
             // Note: Decode the live view jpeg image on a seperate thread to keep the UI responsive
             // Not using this right now because there is no live display in the UI. 
 
-
             //ThreadPool.QueueUserWorkItem(new WaitCallback((o) =>
             //{
             //    Debug.Assert(liveViewImage != null);
