@@ -90,7 +90,7 @@ namespace seawatcher3000
             }
         }
 
-        async void _timer_Tick(object sender, EventArgs e)
+        void _timer_Tick(object sender, EventArgs e)
         {
             Trace.WriteLine("Tick");
             Debug.Assert(_device != null);
@@ -100,10 +100,6 @@ namespace seawatcher3000
             try
             {
                 liveViewImage = _device.GetLiveViewImage();
-                //var result = await predictor.DetectAsync(liveViewImage.JpegBuffer); // TODO: Use path or pass image (byte data) directly?
-                var result = await predictor.DetectAsync("test_image.jpg");
-                Trace.WriteLine("scanned image: ");
-                Trace.WriteLine(result);
             }
             catch (NikonException ex)
             {
@@ -116,26 +112,29 @@ namespace seawatcher3000
                 return;
             }
 
-            // Note: Decode the live view jpeg image on a seperate thread to keep the UI responsive
-            // Not using this right now because there is no live display in the UI. 
+            // Decode the live view jpeg image on a seperate thread to keep the UI responsive
+            ThreadPool.QueueUserWorkItem(new WaitCallback((o) =>
+            {
+                Debug.Assert(liveViewImage != null);
 
-            //ThreadPool.QueueUserWorkItem(new WaitCallback((o) =>
-            //{
-            //    Debug.Assert(liveViewImage != null);
+                JpegBitmapDecoder decoder = new JpegBitmapDecoder(
+                    new MemoryStream(liveViewImage.JpegBuffer),
+                    BitmapCreateOptions.None,
+                    BitmapCacheOption.OnLoad);
 
-            //    JpegBitmapDecoder decoder = new JpegBitmapDecoder(
-            //        new MemoryStream(liveViewImage.JpegBuffer),
-            //        BitmapCreateOptions.None,
-            //        BitmapCacheOption.OnLoad);
+                Debug.Assert(decoder.Frames.Count > 0);
+                BitmapFrame frame = decoder.Frames[0];
 
-            //    Debug.Assert(decoder.Frames.Count > 0);
-            //    BitmapFrame frame = decoder.Frames[0];
+                // Not using this right now because there is no live display in the UI. 
+                //    Dispatcher.CurrentDispatcher.Invoke((Action)(() =>
+                //    {
+                //        SetLiveViewImage(frame);
+                //    }));
 
-            //    Dispatcher.CurrentDispatcher.Invoke((Action)(() =>
-            //    {
-            //        SetLiveViewImage(frame);
-            //    }));
-            //}));
+                //var result = await predictor.DetectAsync(liveViewImage.JpegBuffer); // TODO: Use path or pass image (byte data) directly?
+                var result = predictor.Detect(liveViewImage.JpegBuffer);
+                Trace.WriteLine("scanned image: " + result);
+            }));  
 
             Save(liveViewImage.JpegBuffer, "liveview.jpg");
         }
