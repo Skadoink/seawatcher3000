@@ -100,12 +100,14 @@ namespace seawatcher3000
             try
             {
                 liveViewImage = _device.GetLiveViewImage();
-                var result = await predictor.DetectAsync(liveViewImage.JpegBuffer); // TODO: Use path or pass image (byte data) directly?
-                Console.WriteLine(result);
+                //var result = await predictor.DetectAsync(liveViewImage.JpegBuffer); // TODO: Use path or pass image (byte data) directly?
+                var result = await predictor.DetectAsync("test_image.jpg");
+                Trace.WriteLine("scanned image: ");
+                Trace.WriteLine(result);
             }
             catch (NikonException ex)
             {
-                Console.WriteLine("Failed to get live view image: " + ex.ToString());
+                Trace.WriteLine("Failed to get live view image: " + ex.ToString());
             }
 
             if (liveViewImage == null)
