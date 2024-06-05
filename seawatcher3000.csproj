@@ -30,4 +30,8 @@
     </Page>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="YoloV8.Gpu" Version="4.1.5" />
+  </ItemGroup>
+
 </Project>

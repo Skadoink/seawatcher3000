@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Compunet.YoloV8;
+using SixLabors.ImageSharp;
 
 namespace seawatcher3000
 {
@@ -11,6 +13,7 @@ namespace seawatcher3000
         public static NikonManager manager = new("Type0020.md3");
         NikonDevice _device;
         public static DispatcherTimer _timer = new();
+        private YoloV8Predictor predictor;
 
         public Seawatcher()
         {
@@ -53,6 +56,10 @@ namespace seawatcher3000
                 NikonDevice device = _device as NikonDevice;
                 if (device != null)
                 {
+                    // Open bird detection model 
+                    predictor = YoloV8Predictor.Create("seaeyes_model_1.onnx");
+
+                    // Start live view
                     device.LiveViewEnabled = true;
                     _timer.Start();
                 }
@@ -83,7 +90,7 @@ namespace seawatcher3000
             }
         }
 
-        void _timer_Tick(object sender, EventArgs e)
+        async void _timer_Tick(object sender, EventArgs e)
         {
             Trace.WriteLine("Tick");
             Debug.Assert(_device != null);
@@ -93,6 +100,8 @@ namespace seawatcher3000
             try
             {
                 liveViewImage = _device.GetLiveViewImage();
+                var result = await predictor.DetectAsync(liveViewImage.JpegBuffer); // TODO: Use path or pass image (byte data) directly?
+                Console.WriteLine(result);
             }
             catch (NikonException ex)
             {
