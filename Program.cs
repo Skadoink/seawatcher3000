@@ -132,6 +132,8 @@ namespace seawatcher3000
             if (result.ToString() == "")
             {
                 Trace.WriteLine("No birds detected");
+                uint afPt = _device.GetUnsigned(eNkMAIDCapability.kNkMAIDCapability_AutoFocusPt);
+                Trace.WriteLine("Auto focus point: " + afPt);
             }
             else
             {
@@ -150,7 +152,9 @@ namespace seawatcher3000
                 // Focus the camera on the target coordinates, or as close as possible given the camera's focus points. 
                 // This is going to be difficult due to the >100ms delay, so the focus could miss the bird and focus on the background instead.
                 // This would be especially bad if the camera is at ground level because it could focus on the sky, making the bird very blurry.
-
+                uint afPt = _device.GetUnsigned(eNkMAIDCapability.kNkMAIDCapability_AutoFocusPt);
+                Trace.WriteLine("Auto focus point: " + afPt);
+                _device.Start(eNkMAIDCapability.kNkMAIDCapability_AutoFocus);
 
                 // Save the image with the detection results, but we don't want to save too often, especially if there's a persistant false positive!
                 result.PlotImage(image);
