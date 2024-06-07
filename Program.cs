@@ -7,6 +7,7 @@ using Compunet.YoloV8;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using Compunet.YoloV8.Plotting;
 
 namespace seawatcher3000
 {
@@ -116,10 +117,10 @@ namespace seawatcher3000
 
             // Load the image from the byte array
             using var image = Image.Load<Rgb24>(liveViewImage.JpegBuffer);
-            // Resize the image to the expected size
+
             image.Mutate(x => x.Resize(new ResizeOptions
             {
-                Size = new Size(640, 640),
+                Size = new Size(640, 640), // Resize
                 Mode = ResizeMode.Pad // This preserves aspect ratio and pads the image with a background color
             }));
 
@@ -128,9 +129,34 @@ namespace seawatcher3000
             var result = predictor.Detect(image);
             watch.Stop();
             Trace.WriteLine("Detection time: " + watch.ElapsedMilliseconds);
-            Trace.WriteLine("Detection results: " + result);
+            if (result.ToString() == "")
+            {
+                Trace.WriteLine("No birds detected");
+            }
+            else
+            {
+                Trace.WriteLine("Detection results: " + result);
+                // Get the target coordinates from the detection results, i.e., the biggest bird detected.
+                RectangleF target = result.Boxes[0].Bounds;
+                foreach (var box in result.Boxes.Skip(1))
+                {
+                    if (box.Bounds.Width * box.Bounds.Height > target.Width * target.Height)
+                    {
+                        target = box.Bounds;
+                    }
+                }
+                PointF targetCenter = RectangleF.Center(target);
 
-            Save(liveViewImage.JpegBuffer, "liveview.jpg");
+                // Focus the camera on the target coordinates, or as close as possible given the camera's focus points. 
+                // This is going to be difficult due to the >100ms delay, so the focus could miss the bird and focus on the background instead.
+                // This would be especially bad if the camera is at ground level because it could focus on the sky, making the bird very blurry.
+
+                // Save the image with the detection results, but we don't want to save too often, especially if there's a persistant false positive!
+                result.PlotImage(image);
+            }
+
+            image.Save("liveview.jpg"); // Just save the latest image to Pictures folder, useful for debugging
+            image.Dispose(); // Dispose of the image to free up memory
         }
 
         void Save(byte[] buffer, string file)
