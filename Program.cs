@@ -37,7 +37,7 @@ namespace seawatcher3000
             // Write list of supported capabilities to the console
             foreach (NkMAIDCapInfo supportedCap in supportedCaps)
             {
-                Console.WriteLine(supportedCap.GetDescription());
+                Trace.WriteLine(supportedCap.GetDescription());
             }
 
             // Write battery level to the console
@@ -150,6 +150,7 @@ namespace seawatcher3000
                 // Focus the camera on the target coordinates, or as close as possible given the camera's focus points. 
                 // This is going to be difficult due to the >100ms delay, so the focus could miss the bird and focus on the background instead.
                 // This would be especially bad if the camera is at ground level because it could focus on the sky, making the bird very blurry.
+
 
                 // Save the image with the detection results, but we don't want to save too often, especially if there's a persistant false positive!
                 result.PlotImage(image);
