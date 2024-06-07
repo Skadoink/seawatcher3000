@@ -114,39 +114,6 @@ namespace seawatcher3000
                 return;
             }
 
-            //// Decode the live view jpeg image on a seperate thread to keep the UI responsive
-            //ThreadPool.QueueUserWorkItem(new WaitCallback((o) =>
-            //{
-            //    Debug.Assert(liveViewImage != null);
-
-            //    JpegBitmapDecoder decoder = new JpegBitmapDecoder(
-            //        new MemoryStream(liveViewImage.JpegBuffer),
-            //        BitmapCreateOptions.None,
-            //        BitmapCacheOption.OnLoad);
-
-            //    Debug.Assert(decoder.Frames.Count > 0);
-            //    BitmapFrame frame = decoder.Frames[0];
-
-            //    // Not using this right now because there is no live display in the UI. 
-            //    //    Dispatcher.CurrentDispatcher.Invoke((Action)(() =>
-            //    //    {
-            //    //        SetLiveViewImage(frame);
-            //    //    }));
-
-            //    //var result = await predictor.DetectAsync(liveViewImage.JpegBuffer); // TODO: Use path or pass image (byte data) directly?
-
-            //    // Load the image from the byte array
-            //    using var image = Image.Load<Rgb24>(liveViewImage.JpegBuffer);
-            //    // Resize the image to the expected size
-            //    image.Mutate(x => x.Resize(new ResizeOptions
-            //    {
-            //        Size = new Size(640, 640),
-            //        Mode = ResizeMode.Pad // This preserves aspect ratio and pads the image with a background color
-            //    }));
-            //    var result = predictor.Detect(image);
-            //    Trace.WriteLine("scanned image: " + result);
-            //}));  
-
             // Load the image from the byte array
             using var image = Image.Load<Rgb24>(liveViewImage.JpegBuffer);
             // Resize the image to the expected size
@@ -155,8 +122,13 @@ namespace seawatcher3000
                 Size = new Size(640, 640),
                 Mode = ResizeMode.Pad // This preserves aspect ratio and pads the image with a background color
             }));
+
+            var watch = Stopwatch.StartNew(); //start stopwatch:
+            watch.Start();
             var result = predictor.Detect(image);
-            Trace.WriteLine("scanned image: " + result);
+            watch.Stop();
+            Trace.WriteLine("Detection time: " + watch.ElapsedMilliseconds);
+            Trace.WriteLine("Detection results: " + result);
 
             Save(liveViewImage.JpegBuffer, "liveview.jpg");
         }
