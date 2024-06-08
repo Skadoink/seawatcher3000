@@ -6,5 +6,8 @@
     <StackPanel VerticalAlignment="Center">
         <ToggleButton Content="Start Live Feed" Height="80" Width="158" x:Name="toggleButton1" Background="#FFDDDDDD"
                       Checked="OnToggledHandler" Unchecked="OnToggledHandler"/>
+        <!-- Live view image -->
+        <Image 
+            Source="{Binding LiveViewImage, Mode=OneWay}" Height="420"/>
     </StackPanel>
 </Window>
