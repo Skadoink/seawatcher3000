@@ -12,11 +12,3 @@ The object detection model only needs to register that there is a bird in the ph
 
 C# wrapper for Nikon SDK will be used to interact with the camera. YOLOv8 on Python for object detection.
 
-## Connecting C# and Python
-
-Going to try with a local socket server:
-    - Both the C# program and Python program running simultaneaously.
-    - C# streams video to the server which the Python program reads.
-    - Python outputs to server the coordinates and size (and possibly direction if we need to be a second ahead) of birds, when applicable. 
-    - C# responds to the information on the server. 
-    - NOTE: We still may run the Python from C# as a simulated command line script, but just to get it up and running without manually starting two programs. I/O will be through the server. 
