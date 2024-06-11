@@ -3,7 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"       
         xmlns:local="clr-namespace:seawatcher3000"
         Title="SeaWatcher3000" Height="768" Width="1024" MinHeight="480" MinWidth="640" Closed="Window_Closed">
-    <StackPanel VerticalAlignment="Center">
+    <Window.Resources>
+        <!-- View models -->
+        <local:Seawatcher x:Key="Seawatcher"/>
+    </Window.Resources>
+    <StackPanel VerticalAlignment="Center" DataContext="{StaticResource Seawatcher}">
         <ToggleButton Content="Start Live Feed" Height="80" Width="158" x:Name="toggleButton1" Background="#FFDDDDDD"
                       Checked="OnToggledHandler" Unchecked="OnToggledHandler"/>
         <!-- Live view image -->
