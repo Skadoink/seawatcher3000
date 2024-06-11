@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
+﻿using System.Windows;
 
 namespace seawatcher3000
 {
-    public partial class MainWindow
+    public partial class MainWindow : Window
     {
-        private Seawatcher sw;
         private bool justCheckedToggleHereSoPleaseBreakInfiniteLoop = false;
         public MainWindow()
         {
             InitializeComponent();
-            sw = new Seawatcher();
         }
 
         private void OnToggledHandler(object sender, System.Windows.RoutedEventArgs e)
