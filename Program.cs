@@ -20,7 +20,7 @@ namespace seawatcher3000
         NikonDevice _device;
         public static DispatcherTimer _timer = new();
         private YoloV8Predictor predictor;
-        Image _liveViewImage;
+        BitmapSource _liveViewImage;
 
         public Seawatcher()
         {
@@ -119,16 +119,33 @@ namespace seawatcher3000
                 return;
             }
 
+            // Note: Decode the live view jpeg image on a seperate thread to keep the UI responsive
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback((o) =>
+            {
+                Debug.Assert(liveViewImage != null);
+
+                JpegBitmapDecoder decoder = new JpegBitmapDecoder(
+                    new MemoryStream(liveViewImage.JpegBuffer),
+                    BitmapCreateOptions.None,
+                    BitmapCacheOption.OnLoad);
+
+                Debug.Assert(decoder.Frames.Count > 0);
+                BitmapFrame frame = decoder.Frames[0];
+
+                Dispatcher.CurrentDispatcher.Invoke((Action)(() =>
+                {
+                    SetLiveViewImage(frame);
+                }));
+            }));
+
             // Load the image from the byte array
             using var image = Image.Load<Rgb24>(liveViewImage.JpegBuffer);
-
             image.Mutate(x => x.Resize(new ResizeOptions
             {
                 Size = new Size(640, 640), // Resize
                 Mode = ResizeMode.Pad // This preserves aspect ratio and pads the image with a background color
             }));
-
-            SetLiveViewImage(image);
 
             var watch = Stopwatch.StartNew(); //start stopwatch:
             watch.Start();
@@ -191,13 +208,13 @@ namespace seawatcher3000
             }
         }
 
-        void SetLiveViewImage(Image image)
+        void SetLiveViewImage(BitmapSource image)
         {
             _liveViewImage = image;
             OnPropertyChanged("LiveViewImage");
         }
 
-        public Image LiveViewImage
+        public BitmapSource LiveViewImage
         {
             get { return _liveViewImage; }
         }
