@@ -25,12 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="MainWindow.xaml">
-      <Generator></Generator>
-    </Page>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.18.0" />
     <PackageReference Include="YoloV8.Gpu" Version="4.1.5" />
   </ItemGroup>
@@ -42,6 +36,12 @@
     <None Update="test_image.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="MainWindow.xaml">
+      <Generator></Generator>
+    </Page>
   </ItemGroup>
 
 </Project>

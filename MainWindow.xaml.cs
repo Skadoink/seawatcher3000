@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Navigation;
 
 namespace seawatcher3000
 {
@@ -10,11 +11,27 @@ namespace seawatcher3000
             InitializeComponent();
         }
 
-        private void OnToggledHandler(object sender, System.Windows.RoutedEventArgs e)
+        object GetDataContext(object sender)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+
+            if (element != null)
+            {
+                return element.DataContext;
+            }
+
+            return null;
+        }
+
+        private void OnToggledHandler(object sender, RoutedEventArgs e)
         {
             if (justCheckedToggleHereSoPleaseBreakInfiniteLoop)
             {
-                justCheckedToggleHereSoPleaseBreakInfiniteLoop = false;
+                justCheckedToggleHereSoPleaseBreakInfiniteLoop = false; 
+                return;
+            }
+            if (GetDataContext(sender) is not Seawatcher sw)
+            {
                 return;
             }
             if (toggleButton1.IsChecked == true)
