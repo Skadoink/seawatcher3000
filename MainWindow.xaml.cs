@@ -11,11 +11,9 @@ namespace seawatcher3000
             InitializeComponent();
         }
 
-        object GetDataContext(object sender)
+        object? GetDataContext(object sender)
         {
-            FrameworkElement element = sender as FrameworkElement;
-
-            if (element != null)
+            if (sender is FrameworkElement element)
             {
                 return element.DataContext;
             }
