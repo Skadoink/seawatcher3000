@@ -63,8 +63,12 @@ namespace seawatcher3000
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            Seawatcher._timer.Stop();
-            Seawatcher.manager.Shutdown();
+            if (GetDataContext(sender) is not Seawatcher sw)
+            {
+                return;
+            }
+            sw.StopTimer();
+            sw.StopManager();
         }
     }
 }

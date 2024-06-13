@@ -16,16 +16,19 @@ namespace seawatcher3000
 {
     class Seawatcher : ViewModelBase
     {
-        public static NikonManager manager = new("Type0020.md3");
-        NikonDevice _device;
-        public static DispatcherTimer _timer = new();
-        private YoloV8Predictor predictor;
+        static NikonManager _manager = new("Type0020.md3");
+        NikonDevice? _device;
+        static DispatcherTimer _timer = new();
+        YoloV8Predictor _predictor;
         BitmapSource _liveViewImage;
 
         public Seawatcher()
         {
             _timer.Interval = TimeSpan.FromMilliseconds(100);
-            manager.DeviceAdded += new DeviceAddedDelegate(manager_DeviceAdded);
+            _manager.DeviceAdded += new DeviceAddedDelegate(manager_DeviceAdded);
+            _timer.Tick += new EventHandler(_timer_Tick);
+            _predictor = YoloV8Predictor.Create("seaeyes_model_1.onnx"); // Load bird detection model 
+            _liveViewImage = BitmapFrame.Create(new Uri("test_image.png"));
         }
 
         /// <summary>
@@ -34,8 +37,6 @@ namespace seawatcher3000
         public void manager_DeviceAdded(NikonManager sender, NikonDevice device)
         {
             _device = device;
-            _timer.Tick += new EventHandler(_timer_Tick);
-
             Trace.WriteLine("Device added: " + device.Name);
             NkMAIDCapInfo[] supportedCaps = device.GetCapabilityInfo();
             // Write list of supported capabilities to the console
@@ -60,12 +61,8 @@ namespace seawatcher3000
         {
             try
             {
-                NikonDevice device = _device as NikonDevice;
-                if (device != null)
+                if (_device is NikonDevice device)
                 {
-                    // Open bird detection model 
-                    predictor = YoloV8Predictor.Create("seaeyes_model_1.onnx");
-
                     // Start live view
                     device.LiveViewEnabled = true;
                     _timer.Start();
@@ -82,9 +79,7 @@ namespace seawatcher3000
         {
             try
             {
-                NikonDevice device = _device as NikonDevice;
-
-                if (device != null)
+                if (_device is NikonDevice device)
                 {
                     _timer.Stop();
                     device.LiveViewEnabled = false;
@@ -97,24 +92,14 @@ namespace seawatcher3000
             }
         }
 
-        void _timer_Tick(object sender, EventArgs e)
+        void _timer_Tick(object? sender, EventArgs e)
         {
             Trace.WriteLine("Tick");
             Debug.Assert(_device != null);
 
-            NikonLiveViewImage liveViewImage = null;
-
-            try
+            if (_device.GetLiveViewImage() is not NikonLiveViewImage liveViewImage)
             {
-                liveViewImage = _device.GetLiveViewImage();
-            }
-            catch (NikonException ex)
-            {
-                Trace.WriteLine("Failed to get live view image: " + ex.ToString());
-            }
-
-            if (liveViewImage == null)
-            {
+                Trace.WriteLine("Failed to get live view image");
                 _timer.Stop();
                 return;
             }
@@ -149,7 +134,7 @@ namespace seawatcher3000
 
             var watch = Stopwatch.StartNew(); //start stopwatch:
             watch.Start();
-            var result = predictor.Detect(image);
+            var result = _predictor.Detect(image);
             watch.Stop();
             Trace.WriteLine("Detection time: " + watch.ElapsedMilliseconds);
             if (result.ToString() == "")
@@ -219,12 +204,22 @@ namespace seawatcher3000
             get { return _liveViewImage; }
         }
 
+        public void StopTimer()
+        {
+            _timer.Stop();
+        }
+
+        public void StopManager()
+        {
+            _manager.Shutdown();
+        }
+
     }
 
     // View model base class
     abstract class ViewModelBase : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName)
         {
