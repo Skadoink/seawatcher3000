@@ -28,7 +28,7 @@ namespace seawatcher3000
             _manager.DeviceAdded += new DeviceAddedDelegate(manager_DeviceAdded);
             _timer.Tick += new EventHandler(_timer_Tick);
             _predictor = YoloV8Predictor.Create("seaeyes_model_1.onnx"); // Load bird detection model 
-            _liveViewImage = BitmapFrame.Create(new Uri("test_image.png"));
+            _liveViewImage = BitmapFrame.Create(new MemoryStream(File.ReadAllBytes("liveview.jpg"))); // Load the latest image from the Pictures folder
         }
 
         /// <summary>
@@ -49,11 +49,21 @@ namespace seawatcher3000
             try
             {
                 int batteryLevel = device.GetInteger(eNkMAIDCapability.kNkMAIDCapability_BatteryLevel);
-                Console.WriteLine("Battery level: " + batteryLevel);
+                Trace.WriteLine("Battery level: " + batteryLevel);
             }
             catch (NikonException ex)
             {
-                Console.WriteLine("Error getting battery level: " + ex.Message);
+                Trace.WriteLine("Error getting battery level: " + ex.Message);
+            }
+
+            // Change live view size to XGA (1024x768 pixels, 4:3 aspect ratio)
+            try
+            {
+                _device.SetUnsigned(eNkMAIDCapability.kNkMAIDCapability_LiveViewImageSize, 3U);
+            }
+            catch (NikonException ex)
+            {
+                Trace.WriteLine("Error setting live view image size: " + ex.Message);
             }
         }
 
@@ -71,7 +81,7 @@ namespace seawatcher3000
             }
             catch (NikonException ex)
             {
-                Console.WriteLine("Failed to start live view: " + ex.ToString());
+                Trace.WriteLine("Failed to start live view: " + ex.ToString());
             }
         }
 
@@ -88,7 +98,7 @@ namespace seawatcher3000
             }
             catch (NikonException ex)
             {
-                Console.WriteLine("Failed to stop live view: " + ex.ToString());
+                Trace.WriteLine("Failed to stop live view: " + ex.ToString());
             }
         }
 
@@ -141,7 +151,7 @@ namespace seawatcher3000
             {
                 Trace.WriteLine("No birds detected");
                 //uint afPt = _device.GetUnsigned(eNkMAIDCapability.kNkMAIDCapability_AutoFocusPt);
-                //Trace.WriteLine("Auto focus point: " + afPt);
+                //Trace.Wri                teLine("Auto focus point: " + afPt);
             }
             else
             {
@@ -189,7 +199,7 @@ namespace seawatcher3000
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to save file: " + path + ", " + ex.Message);
+                Trace.WriteLine("Failed to save file: " + path + ", " + ex.Message);
             }
         }
 
