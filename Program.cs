@@ -59,7 +59,7 @@ namespace seawatcher3000
             // Change live view size to XGA (1024x768 pixels, 4:3 aspect ratio)
             try
             {
-                _device.SetUnsigned(eNkMAIDCapability.kNkMAIDCapability_LiveViewImageSize, 3U);
+                device.SetUnsigned(eNkMAIDCapability.kNkMAIDCapability_LiveViewImageSize, 3);
             }
             catch (NikonException ex)
             {
