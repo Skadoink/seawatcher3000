@@ -26,7 +26,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.18.0" />
-    <PackageReference Include="YoloV8.Gpu" Version="4.1.5" />
+    <PackageReference Include="YoloV8.Gpu" Version="4.1.6" />
   </ItemGroup>
 
   <ItemGroup>

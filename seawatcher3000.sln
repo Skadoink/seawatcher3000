@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "seawatcher3000", "seawatcher3000.csproj", "{3EA51D6A-C405-4115-A562-C1C06DF02FCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nikoncswrapper", "..\..\..\Downloads\nikoncswrapper_v2.1 (1)\src\nikoncswrapper\nikoncswrapper.csproj", "{AADE1DF5-4C46-4760-B72B-474D90336F5B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nikoncswrapper", "..\..\..\Downloads\nikoncswrapper_v2.1\src\nikoncswrapper\nikoncswrapper.csproj", "{AADE1DF5-4C46-4760-B72B-474D90336F5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
