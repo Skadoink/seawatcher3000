@@ -21,6 +21,7 @@ namespace seawatcher3000
         static DispatcherTimer _timer = new();
         YoloV8Predictor _predictor;
         BitmapSource _liveViewImage;
+        static System.Timers.Timer focusTimer; 
 
         public Seawatcher()
         {
@@ -29,6 +30,7 @@ namespace seawatcher3000
             _timer.Tick += new EventHandler(_timer_Tick);
             _predictor = YoloV8Predictor.Create("seaeyes_model_1.onnx"); // Load bird detection model 
             _liveViewImage = BitmapFrame.Create(new MemoryStream(File.ReadAllBytes("liveview.jpg"))); // Load the latest image from the Pictures folder
+            setFocusTimer();
         }
 
         /// <summary>
@@ -77,6 +79,14 @@ namespace seawatcher3000
             }
         }
 
+        private void setFocusTimer()
+        {
+            focusTimer = new System.Timers.Timer(3000); // 300000ms = 5 minutes
+            focusTimer.Elapsed += (sender, e) => LiveViewFocus();
+            focusTimer.AutoReset = true;
+            focusTimer.Enabled = true;
+        }
+
         public void StartLiveView()
         {
             try
@@ -85,6 +95,7 @@ namespace seawatcher3000
                 {
                     // Start live view
                     device.LiveViewEnabled = true;
+                    LiveViewFocus();
                     _timer.Start();
                 }
                 else { throw new Exception(); }
@@ -109,6 +120,34 @@ namespace seawatcher3000
             catch (NikonException ex)
             {
                 Trace.WriteLine("Failed to stop live view: " + ex.ToString());
+            }
+        }
+
+        /*
+         * Focus the camera using the live view AF. 
+         */
+        public void LiveViewFocus()
+        {
+            try
+            {
+                if (_device is NikonDevice device && _device.LiveViewEnabled)
+                {
+                    NikonEnum contrastAFActions = device.GetEnum(eNkMAIDCapability.kNkMAIDCapability_ContrastAF);
+                    for (int i = 0; i < contrastAFActions.Length; i++)
+                    {
+                        if ((uint)contrastAFActions[i] == (uint)eNkMAIDContrastAF.kNkMAIDContrastAF_Start)
+                        {
+                            contrastAFActions.Index = i;
+                            device.SetEnum(eNkMAIDCapability.kNkMAIDCapability_ContrastAF, contrastAFActions);
+                            break;
+                        }
+                    }
+                }
+                else { throw new Exception(); }
+            }
+            catch (NikonException ex)
+            {
+                Trace.WriteLine("Failed to focus live view: " + ex.ToString());
             }
         }
 
