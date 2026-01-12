@@ -22,7 +22,9 @@ namespace seawatcher3000
         static DispatcherTimer _timer = new();
         YoloPredictor _predictor;
         BitmapSource _liveViewImage;
-        static System.Timers.Timer focusTimer; 
+        static System.Timers.Timer focusTimer;
+        List<int> save_indices = [3, 5, 8, 12, 18, 26, 37];
+        int consecutive_detections = 0;
 
         public Seawatcher()
         {
@@ -164,8 +166,7 @@ namespace seawatcher3000
                 return;
             }
 
-            // Note: Decode the live view jpeg image on a seperate thread to keep the UI responsive
-
+            // Decode the live view jpeg image on a seperate thread to keep the UI responsive
             ThreadPool.QueueUserWorkItem(new WaitCallback((o) =>
             {
                 Debug.Assert(liveViewImage != null);
@@ -200,12 +201,14 @@ namespace seawatcher3000
             if (result.ToString() == "")
             {
                 Trace.WriteLine("No birds detected");
+                consecutive_detections = 0;
                 //uint afPt = _device.GetUnsigned(eNkMAIDCapability.kNkMAIDCapability_AutoFocusPt);
-                //Trace.Wri                teLine("Auto focus point: " + afPt);
+                //Trace.WriteLine("Auto focus point: " + afPt);
             }
             else
             {
                 Trace.WriteLine("Detection results: " + result);
+                consecutive_detections += 1;
                 // Get the target coordinates from the detection results, i.e., the biggest bird detected.
                 // This is bad logic because diagonal birds will have bigger bounding boxes than frontal birds
                 // TODO: Use oriented bounding boxes instead
@@ -228,9 +231,16 @@ namespace seawatcher3000
 
                 // Save the image with the detection results, but we don't want to save too often, especially if there's a persistant false positive! Use root factorials or similar to save decreasingly often.
                 result.PlotImage(image);
+                if (!Directory.Exists("detections"))
+                {
+                    Directory.CreateDirectory("detections");
+                }
+                if (save_indices.Contains(consecutive_detections))
+                {
+                    string filename = Path.Combine("detections", "detection_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".jpg");
+                    image.SaveAsJpegAsync(filename);
+                }
             }
-
-            image.Save("liveview.jpg"); // Just save the latest image to Pictures folder, useful for debugging
             image.Dispose(); // Dispose of the image to free up memory
         }
 
