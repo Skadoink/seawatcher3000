@@ -3,14 +3,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Compunet.YoloV8;
+using Compunet.YoloSharp;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using Compunet.YoloV8.Plotting;
+using Compunet.YoloSharp.Plotting;
 using System.Windows.Data;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using Compunet.YoloSharp.Data;
 
 namespace seawatcher3000
 {
@@ -19,7 +20,7 @@ namespace seawatcher3000
         static NikonManager _manager = new("Type0020.md3");
         NikonDevice? _device;
         static DispatcherTimer _timer = new();
-        YoloV8Predictor _predictor;
+        YoloPredictor _predictor;
         BitmapSource _liveViewImage;
         static System.Timers.Timer focusTimer; 
 
@@ -28,7 +29,7 @@ namespace seawatcher3000
             _timer.Interval = TimeSpan.FromMilliseconds(100);
             _manager.DeviceAdded += new DeviceAddedDelegate(manager_DeviceAdded);
             _timer.Tick += new EventHandler(_timer_Tick);
-            _predictor = YoloV8Predictor.Create("seaeyes_model_1.onnx"); // Load bird detection model 
+            _predictor = new YoloPredictor("seaeyes_model_1.onnx"); // Load bird detection model 
             _liveViewImage = BitmapFrame.Create(new MemoryStream(File.ReadAllBytes("liveview.jpg"))); // Load the latest image from the Pictures folder
             setFocusTimer();
         }
@@ -206,15 +207,17 @@ namespace seawatcher3000
             {
                 Trace.WriteLine("Detection results: " + result);
                 // Get the target coordinates from the detection results, i.e., the biggest bird detected.
-                RectangleF target = result.Boxes[0].Bounds;
-                foreach (var box in result.Boxes.Skip(1))
+                // This is bad logic because diagonal birds will have bigger bounding boxes than frontal birds
+                // TODO: Use oriented bounding boxes instead
+                Detection target = result.First();
+                foreach (var detection in result.Skip(1))
                 {
-                    if (box.Bounds.Width * box.Bounds.Height > target.Width * target.Height)
+                    if (detection.Bounds.Width * detection.Bounds.Height > target.Bounds.Width * target.Bounds.Height)
                     {
-                        target = box.Bounds;
+                        target = detection;
                     }
                 }
-                PointF targetCenter = RectangleF.Center(target);
+                PointF targetCenter = RectangleF.Center(target.Bounds);
 
                 // Focus the camera on the target coordinates, or as close as possible given the camera's focus points. 
                 // This is going to be difficult due to the >100ms delay, so the focus could miss the bird and focus on the background instead.
