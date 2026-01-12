@@ -99,8 +99,8 @@ namespace seawatcher3000
                     LiveViewFocus();
                     _timer.Start();
                 }
-                else { throw new Exception(); }
-            }
+                else { throw new Exception("No device connected"); }
+                }
             catch (NikonException ex)
             {
                 Trace.WriteLine("Failed to start live view: " + ex.ToString());

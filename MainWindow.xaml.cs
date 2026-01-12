@@ -23,11 +23,6 @@ namespace seawatcher3000
 
         private void OnToggledHandler(object sender, RoutedEventArgs e)
         {
-            if (justCheckedToggleHereSoPleaseBreakInfiniteLoop)
-            {
-                justCheckedToggleHereSoPleaseBreakInfiniteLoop = false; 
-                return;
-            }
             if (GetDataContext(sender) is not Seawatcher sw)
             {
                 return;
@@ -42,8 +37,11 @@ namespace seawatcher3000
                 }
                 catch
                 {
-                    justCheckedToggleHereSoPleaseBreakInfiniteLoop = true;
+                    toggleButton1.Checked -= OnToggledHandler;
+                    toggleButton1.Unchecked -= OnToggledHandler; // Unsubscribe to avoid recursion
                     toggleButton1.IsChecked = false;
+                    toggleButton1.Checked += OnToggledHandler;
+                    toggleButton1.Unchecked += OnToggledHandler;
                 }
             }
             else
@@ -55,8 +53,11 @@ namespace seawatcher3000
                 }
                 catch
                 {
-                    justCheckedToggleHereSoPleaseBreakInfiniteLoop = true;
+                    toggleButton1.Checked -= OnToggledHandler;
+                    toggleButton1.Unchecked -= OnToggledHandler; // Unsubscribe to avoid recursion
                     toggleButton1.IsChecked = true;
+                    toggleButton1.Checked += OnToggledHandler;
+                    toggleButton1.Unchecked += OnToggledHandler;
                 }
             }
         }
