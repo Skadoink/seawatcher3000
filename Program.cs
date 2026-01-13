@@ -34,6 +34,11 @@ namespace seawatcher3000
             _predictor = new YoloPredictor("seaeyes_model_1.onnx"); // Load bird detection model 
             _liveViewImage = BitmapFrame.Create(new MemoryStream(File.ReadAllBytes("liveview.jpg"))); // Load the latest image from the Pictures folder
             setFocusTimer();
+
+            if (!Directory.Exists("detections"))
+            {
+                Directory.CreateDirectory("detections");
+            }
         }
 
         /// <summary>
@@ -231,10 +236,6 @@ namespace seawatcher3000
 
                 // Save the image with the detection results, but we don't want to save too often, especially if there's a persistant false positive! Use root factorials or similar to save decreasingly often.
                 result.PlotImage(image);
-                if (!Directory.Exists("detections"))
-                {
-                    Directory.CreateDirectory("detections");
-                }
                 if (save_indices.Contains(consecutive_detections))
                 {
                     string filename = Path.Combine("detections", "detection_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".jpg");
