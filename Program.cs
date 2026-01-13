@@ -236,13 +236,35 @@ namespace seawatcher3000
 
                 // Save the image with the detection results, but we don't want to save too often, especially if there's a persistant false positive! Use root factorials or similar to save decreasingly often.
                 result.PlotImage(image);
-                if (save_indices.Contains(consecutive_detections))
+                if (consecutive_detections == 1) // First detection in sequence
+                {
+                    // New track
+                }
+                else if (isNewTrack(image)) // Detect if this is a new track based on spatial heuristics
+                {
+                    // New track
+                    consecutive_detections = 0;
+                }
+                else if (save_indices.Contains(consecutive_detections))
                 {
                     string filename = Path.Combine("detections", "detection_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".jpg");
                     image.SaveAsJpegAsync(filename);
+                    //TODO: Trigger shutter
                 }
             }
             image.Dispose(); // Dispose of the image to free up memory
+        }
+
+        /// <summary>
+        /// Determines whether the specified image represents a new track.
+        /// Use spatial heuristics to determine if the detected bird is different to previous detections in the 
+        /// consecutive sequence.
+        /// </summary>
+        /// <param name="image">The image to analyze for the presence of a new bird.</param>
+        /// <returns>true if the image is identified as a new track; otherwise, false.</returns>
+        private bool isNewTrack(Image<Rgb24> image)
+        {
+            throw new NotImplementedException();
         }
 
         void Save(byte[] buffer, string file)
