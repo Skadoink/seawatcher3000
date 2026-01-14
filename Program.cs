@@ -32,7 +32,7 @@ namespace seawatcher3000
             _timer.Interval = TimeSpan.FromMilliseconds(100);
             _manager.DeviceAdded += new DeviceAddedDelegate(manager_DeviceAdded);
             _timer.Tick += new EventHandler(_timer_Tick);
-            _predictor = new YoloPredictor("seaeyes_model_1.onnx"); // Load bird detection model 
+            _predictor = new YoloPredictor("seaeyes_model_1_obb.onnx"); // OBB model
             _liveViewImage = BitmapFrame.Create(new MemoryStream(File.ReadAllBytes("liveview.jpg"))); // Load the latest image from the Pictures folder
             setFocusTimer();
 
@@ -201,7 +201,7 @@ namespace seawatcher3000
 
             var watch = Stopwatch.StartNew(); //start stopwatch:
             watch.Start();
-            var result = _predictor.Detect(image);
+            var result = _predictor.DetectObb(image);
             watch.Stop();
             Trace.WriteLine("Detection time: " + watch.ElapsedMilliseconds);
             if (result.ToString() == "")
@@ -218,10 +218,14 @@ namespace seawatcher3000
                 // Get the target coordinates from the detection results, i.e., the biggest bird detected.
                 // This is bad logic because diagonal birds will have bigger bounding boxes than frontal birds
                 // TODO: Use oriented bounding boxes instead
-                Detection target = result.First();
+                ObbDetection target = result.First();
                 foreach (var detection in result.Skip(1))
                 {
-                    if (detection.Bounds.Width * detection.Bounds.Height > target.Bounds.Width * target.Bounds.Height)
+                    // Calculate actual area considering rotation
+                    float area = detection.Bounds.Width * detection.Bounds.Height;
+                    float targetArea = target.Bounds.Width * target.Bounds.Height;
+                    
+                    if (area > targetArea)
                     {
                         target = detection;
                     }
@@ -273,11 +277,11 @@ namespace seawatcher3000
         /// <param name="target">The detection to evaluate.</param>
         /// <param name="image">The current frame image.</param>
         /// <returns>true if the bird is identified as a new track; otherwise, false.</returns>
-        private bool isNewTrack(Detection target, Image<Rgb24> image)
+        private bool isNewTrack(ObbDetection target, Image<Rgb24> image)
         {
             // ----- Is the direction of flight significantly different? -----
             PointF currentCenter = RectangleF.Center(target.Bounds);
-            
+
             // Get last two positions to calculate previous direction
             var prevPos2 = currentTrack.Positions[^2];
             var prevPos1 = currentTrack.Positions[^1];
@@ -285,14 +289,14 @@ namespace seawatcher3000
             // Calculate previous direction vector
             float prevDx = prevPos1.X - prevPos2.X;
             float prevDy = prevPos1.Y - prevPos2.Y;
-            
+
             // Calculate current direction vector
             float currentDx = currentCenter.X - prevPos1.X;
             float currentDy = currentCenter.Y - prevPos1.Y;
             
             // Calculate dot product
             double dotProduct = prevDx * currentDx + prevDy * currentDy;
-            
+
             // If dot product is zero or negative, angle >= 90° (direction changed significantly)
             if (dotProduct <= 0)
             {
