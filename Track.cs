@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-public class Engagement
+
+namespace seawatcher3000
 {
-    public int ConsecutiveDetections { get; set; }
-    public List<(float X, float Y)> Positions { get; } = new();
-
-    public double? LastSaveTime { get; set; }
-    public double SaveGapSeconds { get; set; } = 0.1;
-
-    public void Reset()
+    public class Track
     {
-        ConsecutiveDetections = 0;
-        Positions.Clear();
-        LastSaveTime = null;
-        SaveGapSeconds = 0.1;
+        public string DateID = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        public List<(float X, float Y, DateTime TimeStamp)> Positions { get; } = new();
+        public List<(float Width, float Height)> BoundingSizes { get; } = new();
+
+        public void Reset()
+        {
+            Positions.Clear();
+            BoundingSizes.Clear();
+            DateID = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        }
     }
 }
+

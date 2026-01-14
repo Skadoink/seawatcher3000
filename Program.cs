@@ -23,8 +23,9 @@ namespace seawatcher3000
         YoloPredictor _predictor;
         BitmapSource _liveViewImage;
         static System.Timers.Timer focusTimer;
-        List<int> save_indices = [3, 5, 8, 12, 18, 26, 37];
+        List<int> save_indices = [3, 5, 8, 12, 18, 26, 37]; // Save at these consecutive detection counts (decreasing frequency)
         int consecutive_detections = 0;
+        Track currentTrack = new Track();
 
         public Seawatcher()
         {
@@ -210,7 +211,7 @@ namespace seawatcher3000
                 //uint afPt = _device.GetUnsigned(eNkMAIDCapability.kNkMAIDCapability_AutoFocusPt);
                 //Trace.WriteLine("Auto focus point: " + afPt);
             }
-            else
+            else // Bird(s) detected
             {
                 Trace.WriteLine("Detection results: " + result);
                 consecutive_detections += 1;
@@ -234,23 +235,32 @@ namespace seawatcher3000
                 //Trace.WriteLine("Auto focus point: " + afPt);
                 //_device.Start(eNkMAIDCapability.kNkMAIDCapability_AutoFocus);
 
-                // Save the image with the detection results, but we don't want to save too often, especially if there's a persistant false positive! Use root factorials or similar to save decreasingly often.
+                // Save the image with the detection results, but we don't want to save too often, especially if there's a persistant false positive! Save decreasingly often.
                 result.PlotImage(image);
                 if (consecutive_detections == 1) // First detection in sequence
                 {
-                    // New track
+                    // Reset track
+                    // because previous frame had no detections
+                    currentTrack.Reset();
                 }
-                else if (isNewTrack(image)) // Detect if this is a new track based on spatial heuristics
+                else if (consecutive_detections >= 3 && isNewTrack(target, image)) // Detect if this is a new bird/track based on spatial heuristics
                 {
-                    // New track
-                    consecutive_detections = 0;
+                    consecutive_detections = 1;
+                    // Reset track
+                    // because bird is different to previous detections in the sequence
+                    currentTrack.Reset();
                 }
-                else if (save_indices.Contains(consecutive_detections))
+                else if (save_indices.Contains(consecutive_detections)) // Save at decreasing frequency
                 {
                     string filename = Path.Combine("detections", "detection_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".jpg");
                     image.SaveAsJpegAsync(filename);
+                    //TODO: Log detection to CSV file with timestamp, bounding box, confidence, etc.
+                    //TODO: Use Track's DateID to group detections of the same bird together
                     //TODO: Trigger shutter
                 }
+                // Update track with new detection
+                currentTrack.Positions.Add((targetCenter.X, targetCenter.Y, DateTime.Now));
+                currentTrack.BoundingSizes.Add((target.Bounds.Width, target.Bounds.Height));
             }
             image.Dispose(); // Dispose of the image to free up memory
         }
@@ -258,13 +268,73 @@ namespace seawatcher3000
         /// <summary>
         /// Determines whether the specified image represents a new track.
         /// Use spatial heuristics to determine if the detected bird is different to previous detections in the 
-        /// consecutive sequence.
+        /// consecutive sequence. Compares to the last two detections in the current track.
         /// </summary>
-        /// <param name="image">The image to analyze for the presence of a new bird.</param>
-        /// <returns>true if the image is identified as a new track; otherwise, false.</returns>
-        private bool isNewTrack(Image<Rgb24> image)
+        /// <param name="target">The detection to evaluate.</param>
+        /// <param name="image">The current frame image.</param>
+        /// <returns>true if the bird is identified as a new track; otherwise, false.</returns>
+        private bool isNewTrack(Detection target, Image<Rgb24> image)
         {
-            throw new NotImplementedException();
+            // ----- Is the direction of flight significantly different? -----
+            PointF currentCenter = RectangleF.Center(target.Bounds);
+            
+            // Get last two positions to calculate previous direction
+            var prevPos2 = currentTrack.Positions[^2];
+            var prevPos1 = currentTrack.Positions[^1];
+            
+            // Calculate previous direction vector
+            float prevDx = prevPos1.X - prevPos2.X;
+            float prevDy = prevPos1.Y - prevPos2.Y;
+            
+            // Calculate current direction vector
+            float currentDx = currentCenter.X - prevPos1.X;
+            float currentDy = currentCenter.Y - prevPos1.Y;
+            
+            // Calculate dot product
+            double dotProduct = prevDx * currentDx + prevDy * currentDy;
+            
+            // If dot product is zero or negative, angle >= 90° (direction changed significantly)
+            if (dotProduct <= 0)
+            {
+                return true;
+            }
+            
+            // ----- Is the size of the bounding box significantly different (+-30%)? -----
+            if (currentTrack.BoundingSizes.Count > 0)
+            {
+                var prevSize = currentTrack.BoundingSizes[^1];
+                float prevArea = prevSize.Width * prevSize.Height;
+                float currentArea = target.Bounds.Width * target.Bounds.Height;
+                
+                float sizeRatio = currentArea / prevArea;
+                
+                if (sizeRatio < 0.7f || sizeRatio > 1.3f)
+                {
+                    return true;
+                }
+            }
+
+            // ----- Is the position of the bird significantly different (>30% image span apart)
+            // ----- AND is the bird sufficiently distant (occupying <20% image width)? -----
+            float imageWidth = image.Width;
+            float imageHeight = image.Height;
+            
+            float distanceFromPrev = (float)Math.Sqrt(
+                Math.Pow(currentCenter.X - prevPos1.X, 2) + 
+                Math.Pow(currentCenter.Y - prevPos1.Y, 2));
+            
+            float maxImageSpan = (float)Math.Sqrt(imageWidth * imageWidth + imageHeight * imageHeight);
+            float distanceRatio = distanceFromPrev / maxImageSpan;
+            
+            bool birdIsDistant = (target.Bounds.Width / imageWidth) < 0.2f;
+            bool positionChangedSignificantly = distanceRatio > 0.3f;
+            
+            if (positionChangedSignificantly && birdIsDistant)
+            {
+                return true;
+            }
+            
+            return false;
         }
 
         void Save(byte[] buffer, string file)
